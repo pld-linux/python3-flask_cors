@@ -7,7 +7,7 @@ Summary:	Flask extension adding a decorator for CORS support
 Summary(pl.UTF-8):	Rozszerzenie Flaska dodające dekorator do obsługi CORS
 Name:		python3-flask_cors
 Version:	4.0.0
-Release:	1
+Release:	2
 License:	MIT
 Group:		Libraries/Python
 #Source0Download: https://pypi.org/simple/Flask-Cors/
