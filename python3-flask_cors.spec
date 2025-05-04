@@ -1,21 +1,22 @@
 #
 # Conditional build:
-%bcond_without	doc	# Sphinx documentation
-%bcond_without	tests	# unit tests
+%bcond_with	doc	# Sphinx documentation
+%bcond_with	tests	# unit tests
 
 Summary:	Flask extension adding a decorator for CORS support
 Summary(pl.UTF-8):	Rozszerzenie Flaska dodające dekorator do obsługi CORS
 Name:		python3-flask_cors
-Version:	4.0.0
-Release:	3
+Version:	5.0.1
+Release:	1
 License:	MIT
 Group:		Libraries/Python
 #Source0Download: https://pypi.org/simple/Flask-Cors/
-Source0:	https://files.pythonhosted.org/packages/source/F/Flask-Cors/Flask-Cors-%{version}.tar.gz
-# Source0-md5:	0ccfa375e744200243d85719b38cdbc6
+Source0:	https://files.pythonhosted.org/packages/source/F/Flask-Cors/flask_cors-%{version}.tar.gz
+# Source0-md5:	786591022a69fc5479c4aa8d71b05abd
 URL:		https://pypi.org/project/Flask-Cors/
+BuildRequires:	python3-build
+BuildRequires:	python3-installer
 BuildRequires:	python3-modules >= 1:3.8
-BuildRequires:	python3-setuptools
 %if %{with tests}
 BuildRequires:	python3-flask >= 0.9
 BuildRequires:	python3-nose
@@ -53,16 +54,22 @@ API documentation for Python Flask-Cors module.
 Dokumentacja API modułu Pythona Flask-Cors.
 
 %prep
-%setup -q -n Flask-Cors-%{version}
+%setup -q -n flask_cors-%{version}
 
 %build
-%py3_build
+%py3_build_pyproject
 
 %if %{with tests}
-nosetests-%{py3_ver} tests
+%{__python3} -m zipfile -e build-3/*.whl build-3-test
+# use explicit plugins list for reliable builds (delete PYTEST_PLUGINS if empty)
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+PYTEST_PLUGINS= \
+%{__python3} -m pytest -o pythonpath="$PWD/build-3-test" tests
 %endif
 
 %if %{with doc}
+%{__python3} -m zipfile -e build-3/*.whl build-3-doc
+PYTHONPATH=$(pwd)/build-3-doc \
 %{__make} -C docs html \
 	SPHINXBUILD=sphinx-build-3
 %endif
@@ -70,16 +77,16 @@ nosetests-%{py3_ver} tests
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%py3_install
+%py3_install_pyproject
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc LICENSE README.rst
+%doc README.rst
 %{py3_sitescriptdir}/flask_cors
-%{py3_sitescriptdir}/Flask_Cors-%{version}-py*.egg-info
+%{py3_sitescriptdir}/flask_cors-%{version}.dist-info
 
 %if %{with doc}
 %files apidocs
